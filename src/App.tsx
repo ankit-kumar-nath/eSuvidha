@@ -19,6 +19,7 @@ import {
   Fingerprint,
   Globe,
   HeartPulse,
+  HelpCircle,
   Home,
   Landmark,
   MessageCircle,
@@ -31,8 +32,6 @@ import {
 } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import {
-  ApplicationRecord,
-  ApplicationStatusStage,
   CENTER_CONFIG,
   GENERAL_FAQS,
   INITIAL_SERVICES,
@@ -42,7 +41,6 @@ import {
 import { TRANSLATIONS } from './data/translations';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { ServiceDetailModal } from './components/ServiceDetailModal';
-import { ApplicationModal } from './components/ApplicationModal';
 
 const HERO_IMAGE_PATH = '/src/assets/images/esuvidha_civic_center_hero_1794578346379.jpg';
 
@@ -76,28 +74,11 @@ export default function App() {
   const [lang, setLang] = useState<Language>('en');
   const t = TRANSLATIONS[lang];
 
-  // Real-time submitted applications state (initialized empty — zero dummy records)
   const [services] = useState<ServiceItem[]>(INITIAL_SERVICES);
-  const [applications, setApplications] = useState<ApplicationRecord[]>(() => {
-    try {
-      const saved = localStorage.getItem('esuvidha_live_applications');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('esuvidha_live_applications', JSON.stringify(applications));
-    } catch {
-      // Ignore storage quota errors
-    }
-  }, [applications]);
 
   // Navbar shrink on scroll + Back to top visibility
   const [isScrolled, setIsScrolled] = useState(false);
-  const [activeMobileTab, setActiveMobileTab] = useState<'home' | 'services' | 'track' | 'contact'>(
+  const [activeMobileTab, setActiveMobileTab] = useState<'home' | 'services' | 'faq' | 'contact'>(
     'home'
   );
 
@@ -169,32 +150,13 @@ export default function App() {
     });
   }, [services, selectedCategory, serviceSearch, lang]);
 
-  // Modals state
+  // Service Detail Modal state
   const [detailService, setDetailService] = useState<ServiceItem | null>(null);
-  const [appModalOpen, setAppModalOpen] = useState(false);
-  const [appModalServiceId, setAppModalServiceId] = useState<string>('epfo');
-  const [appModalSubService, setAppModalSubService] = useState<string>('');
-
-  // Real-time Application Tracker state (no dummy prefill)
-  const [trackQuery, setTrackQuery] = useState<string>('');
-  const [trackedApp, setTrackedApp] = useState<ApplicationRecord | null>(null);
-  const [trackSearched, setTrackSearched] = useState(false);
-
-  const handleTrackSearch = (e?: React.FormEvent, customQuery?: string) => {
-    if (e) e.preventDefault();
-    const q = (customQuery ?? trackQuery).trim().toUpperCase();
-    if (!q) return;
-    setTrackSearched(true);
-    const found = applications.find(
-      (a) => a.id.toUpperCase() === q || a.mobile === q.replace(/\D/g, '')
-    );
-    setTrackedApp(found || null);
-  };
 
   // FAQ Accordion state
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(0);
 
-  // Contact Inquiry Form state (opens WhatsApp directly on submit)
+  // Contact Inquiry Form state
   const [contactName, setContactName] = useState('');
   const [contactMobile, setContactMobile] = useState('');
   const [contactService, setContactService] = useState('EPFO & PF Claim Services');
@@ -215,28 +177,6 @@ export default function App() {
     setContactErrorText('');
     setContactSubmitted(true);
   };
-
-  const handleAddApplication = (newRecord: ApplicationRecord) => {
-    setApplications((prev) => [newRecord, ...prev]);
-    setTrackQuery(newRecord.id);
-    setTrackedApp(newRecord);
-    setTrackSearched(true);
-  };
-
-  const openApplicationForService = (serviceId: string, subService?: string) => {
-    setDetailService(null);
-    setAppModalServiceId(serviceId);
-    setAppModalSubService(subService || '');
-    setAppModalOpen(true);
-  };
-
-  const stageOrder: ApplicationStatusStage[] = [
-    'Received',
-    'Processing',
-    'Submitted',
-    'Completed',
-  ];
-  const currentStageIndex = trackedApp ? stageOrder.indexOf(trackedApp.status) : 0;
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-16 md:pb-0">
@@ -283,10 +223,10 @@ export default function App() {
               {t.nav.howItWorks}
             </a>
             <a
-              href="#track"
+              href="#faq"
               className="hover:text-[#0B2A5B] dark:hover:text-[#FF9933] hover:underline underline-offset-4 transition-colors whitespace-nowrap shrink-0"
             >
-              {t.nav.track}
+              {t.nav.faq}
             </a>
             <a
               href="#contact"
@@ -296,35 +236,31 @@ export default function App() {
             </a>
           </nav>
 
-          {/* Zone 3: Primary Action Button */}
+          {/* Zone 3: Primary Action Button (WhatsApp Us) */}
           <div className="flex items-center shrink-0">
-            <button
-              type="button"
-              onClick={() => openApplicationForService('epfo')}
-              className="min-h-[44px] px-5 py-2.5 rounded-xl bg-[#0B2A5B] hover:bg-[#0B2A5B]/90 dark:bg-[#FF9933] dark:hover:bg-[#e88724] text-white dark:text-slate-950 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            <a
+              href={`https://wa.me/${CENTER_CONFIG.whatsappNumber}?text=${encodeURIComponent(
+                'Hello eSuvidha, I need assistance with a government document service.'
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="min-h-[44px] px-5 py-2.5 rounded-xl bg-[#138808] hover:bg-[#0f6f06] text-white text-xs sm:text-sm font-semibold transition-colors flex items-center gap-2 whitespace-nowrap shrink-0"
             >
-              {t.nav.applyNow}
-            </button>
+              <MessageCircle className="w-4 h-4" />
+              <span>{t.nav.whatsappCta}</span>
+            </a>
           </div>
         </div>
       </header>
 
       {/* =====================================================================
-          CLEAN UTILITY BAR (Direct WhatsApp Helpline, Language Toggle, Theme)
+          CLEAN UTILITY BAR (Language Toggle & Theme Toggle)
       ===================================================================== */}
       <div className="bg-slate-100/90 dark:bg-slate-900/90 border-b border-slate-200/70 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-3">
-          {/* Left: Direct WhatsApp & Helpline */}
+          {/* Left: Working Hours */}
           <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
-            <span>WhatsApp &amp; Helpline:</span>
-            <a
-              href={`https://wa.me/${CENTER_CONFIG.whatsappNumber}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-slate-900 dark:text-white hover:underline tabular-nums"
-            >
-              {CENTER_CONFIG.phone}
-            </a>
+            <span>{CENTER_CONFIG.workingHours}</span>
           </div>
 
           {/* Right: Language Switcher & Theme Toggle */}
@@ -395,25 +331,24 @@ export default function App() {
                 </p>
 
                 <div className="flex flex-wrap items-center gap-3.5 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => openApplicationForService('epfo')}
-                    className="min-h-[48px] px-6 py-3 rounded-xl bg-[#FF9933] hover:bg-[#e88724] text-slate-950 font-semibold text-sm sm:text-base shadow-sm transition-transform active:scale-[0.99] flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer"
-                  >
-                    <span>{t.hero.primaryCta}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-
                   <a
                     href={`https://wa.me/${CENTER_CONFIG.whatsappNumber}?text=${encodeURIComponent(
                       'Hello eSuvidha, I need assistance with a government document service.'
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="min-h-[48px] px-5 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-[#138808] text-slate-800 dark:text-slate-100 font-semibold text-sm sm:text-base transition-colors flex items-center gap-2 whitespace-nowrap shrink-0"
+                    className="min-h-[48px] px-6 py-3 rounded-xl bg-[#138808] hover:bg-[#0f6f06] text-white font-semibold text-sm sm:text-base shadow-sm transition-transform active:scale-[0.99] flex items-center gap-2 whitespace-nowrap shrink-0"
                   >
-                    <MessageCircle className="w-4 h-4 text-[#138808]" />
-                    <span>{t.hero.secondaryCta} (7609068783)</span>
+                    <MessageCircle className="w-4 h-4" />
+                    <span>{t.hero.primaryCta}</span>
+                  </a>
+
+                  <a
+                    href="#services"
+                    className="min-h-[48px] px-5 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-[#0B2A5B] text-slate-800 dark:text-slate-100 font-semibold text-sm sm:text-base transition-colors flex items-center gap-2 whitespace-nowrap shrink-0"
+                  >
+                    <span>{t.hero.secondaryCta}</span>
+                    <ArrowRight className="w-4 h-4" />
                   </a>
                 </div>
 
@@ -457,7 +392,7 @@ export default function App() {
                   <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3 text-white">
                     <div>
                       <div className="text-xs text-amber-300 font-medium">
-                        Online &amp; WhatsApp Documentation Desk
+                        Government Services &amp; Documentation Desk
                       </div>
                       <div className="text-sm sm:text-base font-semibold mt-0.5">
                         EPFO · PAN · Voter ID · Certificates · Aadhaar
@@ -525,6 +460,9 @@ export default function App() {
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredServices.map((service, idx) => {
               const IconComponent = SERVICE_ICONS[service.iconName] || FileText;
+              const serviceWhatsappUrl = `https://wa.me/${CENTER_CONFIG.whatsappNumber}?text=${encodeURIComponent(
+                `Hello eSuvidha, I need assistance with ${service.title.en}.`
+              )}`;
 
               return (
                 <motion.article
@@ -579,14 +517,15 @@ export default function App() {
                       >
                         Documents List
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => openApplicationForService(service.id)}
-                        className="min-h-[44px] px-3 py-2 rounded-xl bg-[#0B2A5B] hover:bg-[#0B2A5B]/90 dark:bg-[#FF9933] dark:hover:bg-[#e88724] text-white dark:text-slate-950 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+                      <a
+                        href={serviceWhatsappUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="min-h-[44px] px-3 py-2 rounded-xl bg-[#138808] hover:bg-[#0f6f06] text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0"
                       >
-                        <span>Apply Now</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        <span>{t.nav.whatsappCta}</span>
+                      </a>
                     </div>
                   </div>
                 </motion.article>
@@ -654,182 +593,52 @@ export default function App() {
         </section>
 
         {/* =====================================================================
-            REAL-TIME APPLICATION STATUS TRACKER (No Dummy Prefills)
-        ===================================================================== */}
-        <section id="track" className="py-14 lg:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="rounded-3xl bg-[#0B2A5B] text-white p-6 sm:p-10 shadow-xl">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              {/* Search Form */}
-              <div className="lg:col-span-5 space-y-3">
-                <h2 className="text-2xl sm:text-3xl font-bold">
-                  {t.sections.trackTitle}
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
-                  {t.sections.trackSubtitle}
-                </p>
-
-                <form onSubmit={(e) => handleTrackSearch(e)} className="pt-2">
-                  <div className="flex flex-col sm:flex-row gap-2.5">
-                    <input
-                      type="text"
-                      value={trackQuery}
-                      onChange={(e) => setTrackQuery(e.target.value)}
-                      placeholder="Application ID or 10-digit Mobile"
-                      aria-label="Application ID or Mobile Number"
-                      className="flex-1 min-h-[48px] px-4 py-2.5 rounded-xl bg-white/10 border border-white/25 text-white placeholder:text-slate-300 text-sm font-mono focus:outline-none focus:border-[#FF9933]"
-                    />
-                    <button
-                      type="submit"
-                      className="min-h-[48px] px-6 py-2.5 rounded-xl bg-[#FF9933] hover:bg-[#e88724] text-slate-950 font-semibold text-sm flex items-center justify-center gap-2 whitespace-nowrap shrink-0 cursor-pointer"
-                    >
-                      <Search className="w-4 h-4" />
-                      <span>Track Status</span>
-                    </button>
-                  </div>
-                </form>
-              </div>
-
-              {/* Status Output */}
-              <div className="lg:col-span-7">
-                {trackedApp ? (
-                  <div className="rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-6 space-y-5">
-                    <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
-                      <div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400 font-mono tabular-nums">
-                          Application ID: <strong className="text-[#0B2A5B] dark:text-[#FF9933]">{trackedApp.id}</strong>
-                        </div>
-                        <h3 className="text-lg font-bold mt-1">
-                          {trackedApp.applicantName} — {trackedApp.serviceName}
-                        </h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                          {trackedApp.subService}
-                        </p>
-                      </div>
-                      <div className="text-right text-xs text-slate-500 dark:text-slate-400 tabular-nums">
-                        <div>Submitted: {trackedApp.submittedAt}</div>
-                      </div>
-                    </div>
-
-                    {/* 4-Stage Stepper */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {stageOrder.map((stageName, idx) => {
-                        const isCompleted = idx <= currentStageIndex;
-                        const isCurrent = idx === currentStageIndex;
-                        return (
-                          <div
-                            key={stageName}
-                            className={`p-3 rounded-xl border ${
-                              isCurrent
-                                ? 'border-[#FF9933] bg-[#FF9933]/10'
-                                : isCompleted
-                                ? 'border-[#138808]/40 bg-[#138808]/5'
-                                : 'border-slate-200 dark:border-slate-800 opacity-60'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between text-xs font-semibold">
-                              <span
-                                className={
-                                  isCurrent
-                                    ? 'text-[#0B2A5B] dark:text-[#FF9933]'
-                                    : isCompleted
-                                    ? 'text-[#138808] dark:text-emerald-400'
-                                    : 'text-slate-400'
-                                }
-                              >
-                                0{idx + 1}. {stageName}
-                              </span>
-                              {isCompleted && (
-                                <CheckCircle2 className="w-4 h-4 text-[#138808] shrink-0" />
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="text-xs text-slate-700 dark:text-slate-300 font-medium">
-                        {trackedApp.remarks}
-                      </div>
-                      <a
-                        href={`https://wa.me/${CENTER_CONFIG.whatsappNumber}?text=${encodeURIComponent(
-                          `Hello eSuvidha, checking status for Application ID: ${trackedApp.id} (${trackedApp.applicantName}).`
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="min-h-[40px] px-4 py-2 rounded-xl bg-[#138808] text-white text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0"
-                      >
-                        <MessageCircle className="w-3.5 h-3.5" />
-                        <span>WhatsApp Support</span>
-                      </a>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="rounded-2xl bg-white/10 border border-white/20 p-6 text-center space-y-2">
-                    <div className="text-sm sm:text-base font-semibold">
-                      {trackSearched
-                        ? 'No application found for this ID or mobile number'
-                        : 'Enter your Application ID or registered mobile number'}
-                    </div>
-                    <p className="text-xs text-slate-300">
-                      Submit a new request using the Apply Now button to receive your Application ID, or message us directly on WhatsApp at 7609068783.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* =====================================================================
             FAQ SECTION
         ===================================================================== */}
-        <section className="py-14 lg:py-20 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white text-center">
-              {t.sections.faqTitle}
-            </h2>
+        <section id="faq" className="py-14 lg:py-20 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white text-center">
+            {t.sections.faqTitle}
+          </h2>
 
-            <div className="mt-8 space-y-3">
-              {GENERAL_FAQS.map((faq, idx) => {
-                const isOpen = openFaqIdx === idx;
-                return (
-                  <div
-                    key={faq.question}
-                    className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 overflow-hidden"
+          <div className="mt-8 space-y-3">
+            {GENERAL_FAQS.map((faq, idx) => {
+              const isOpen = openFaqIdx === idx;
+              return (
+                <div
+                  key={faq.question}
+                  className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaqIdx(isOpen ? null : idx)}
+                    aria-expanded={isOpen}
+                    className="w-full min-h-[54px] px-5 py-4 text-left flex items-center justify-between gap-4 cursor-pointer"
                   >
-                    <button
-                      type="button"
-                      onClick={() => setOpenFaqIdx(isOpen ? null : idx)}
-                      aria-expanded={isOpen}
-                      className="w-full min-h-[54px] px-5 py-4 text-left flex items-center justify-between gap-4 cursor-pointer"
-                    >
-                      <span className="text-sm sm:text-base font-semibold text-slate-900 dark:text-white">
-                        {faq.question}
-                      </span>
-                      <ChevronDown
-                        className={`w-5 h-5 text-slate-500 shrink-0 transition-transform duration-200 ${
-                          isOpen ? 'rotate-180 text-[#0B2A5B] dark:text-[#FF9933]' : ''
-                        }`}
-                      />
-                    </button>
-                    <AnimatePresence initial={false}>
-                      {isOpen && (
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.15 }}
-                          className="px-5 pb-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-200/60 dark:border-slate-800 pt-3"
-                        >
-                          {faq.answer}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                );
-              })}
-            </div>
+                    <span className="text-sm sm:text-base font-semibold text-slate-900 dark:text-white">
+                      {faq.question}
+                    </span>
+                    <ChevronDown
+                      className={`w-5 h-5 text-slate-500 shrink-0 transition-transform duration-200 ${
+                        isOpen ? 'rotate-180 text-[#0B2A5B] dark:text-[#FF9933]' : ''
+                      }`}
+                    />
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                        className="px-5 pb-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-200/60 dark:border-slate-800 pt-3"
+                      >
+                        {faq.answer}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
           </div>
         </section>
 
@@ -838,17 +647,17 @@ export default function App() {
         ===================================================================== */}
         <section
           id="contact"
-          className="py-14 lg:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-200/80 dark:border-slate-800"
+          className="py-14 lg:py-20 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-            {/* Left Column: Real Contact Info */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10">
+            {/* Left Column: Contact Info */}
             <div className="lg:col-span-5 space-y-6">
               <div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
                   {t.sections.contactTitle}
                 </h2>
                 <p className="text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
-                  Reach out directly via phone or WhatsApp for quick document verification and online form submission.
+                  Reach out directly via phone or WhatsApp for quick document verification and form submission.
                 </p>
               </div>
 
@@ -902,12 +711,12 @@ export default function App() {
 
             {/* Right Column: Direct Inquiry / WhatsApp Connect Form */}
             <div className="lg:col-span-7">
-              <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm">
+              <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 p-6 sm:p-8">
                 <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
                   Send a Service Inquiry
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  Fill in your details below to connect with our desk.
+                  Fill in your details below to connect with our desk on WhatsApp.
                 </p>
 
                 <form onSubmit={handleContactSubmit} className="mt-6 space-y-4">
@@ -920,7 +729,7 @@ export default function App() {
                   {contactSubmitted && (
                     <div className="p-4 rounded-xl bg-[#138808]/10 border border-[#138808]/30 text-xs sm:text-sm text-[#138808] dark:text-emerald-400 flex items-center justify-between gap-3">
                       <span>
-                        Details ready for +91 {contactMobile}. Click to send on WhatsApp:
+                        Details ready for +91 {contactMobile}. Click to open WhatsApp:
                       </span>
                       <a
                         href={`https://wa.me/${CENTER_CONFIG.whatsappNumber}?text=${encodeURIComponent(
@@ -930,7 +739,7 @@ export default function App() {
                         rel="noopener noreferrer"
                         className="px-3.5 py-2 rounded-lg bg-[#138808] text-white font-semibold whitespace-nowrap shrink-0"
                       >
-                        Send on WhatsApp
+                        WhatsApp Us
                       </a>
                     </div>
                   )}
@@ -949,7 +758,7 @@ export default function App() {
                         value={contactName}
                         onChange={(e) => setContactName(e.target.value)}
                         placeholder="Enter your name"
-                        className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white"
+                        className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-white"
                       />
                     </div>
                     <div>
@@ -968,7 +777,7 @@ export default function App() {
                           setContactMobile(e.target.value.replace(/\D/g, '').slice(0, 10))
                         }
                         placeholder="10-digit mobile number"
-                        className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-mono tabular-nums text-slate-900 dark:text-white"
+                        className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-mono tabular-nums text-slate-900 dark:text-white"
                       />
                     </div>
                   </div>
@@ -984,7 +793,7 @@ export default function App() {
                       id="contact-service"
                       value={contactService}
                       onChange={(e) => setContactService(e.target.value)}
-                      className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white"
+                      className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-white"
                     >
                       {services.map((s) => (
                         <option key={s.id} value={s.title.en}>
@@ -1007,7 +816,7 @@ export default function App() {
                       value={contactMessage}
                       onChange={(e) => setContactMessage(e.target.value)}
                       placeholder="Write your query..."
-                      className="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white"
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-white"
                     />
                   </div>
 
@@ -1035,7 +844,7 @@ export default function App() {
             <div>
               <div className="text-xl font-bold text-white">eSuvidha</div>
               <p className="text-xs sm:text-sm text-slate-400 mt-1">
-                Government Services &amp; Documentation Center · WhatsApp: 7609068783
+                Government Services &amp; Documentation Center
               </p>
             </div>
 
@@ -1046,8 +855,8 @@ export default function App() {
               <a href="#how-it-works" className="hover:text-white">
                 How It Works
               </a>
-              <a href="#track" className="hover:text-white">
-                Track Status
+              <a href="#faq" className="hover:text-white">
+                FAQ
               </a>
               <a href="#contact" className="hover:text-white">
                 Contact
@@ -1087,7 +896,7 @@ export default function App() {
           className="min-h-[48px] px-4 py-2.5 rounded-full bg-[#138808] hover:bg-[#0f6f06] text-white shadow-xl flex items-center gap-2 text-xs sm:text-sm font-semibold transition-transform hover:scale-105"
         >
           <MessageCircle className="w-5 h-5" />
-          <span className="hidden sm:inline">WhatsApp Us</span>
+          <span className="hidden sm:inline">{t.nav.whatsappCta}</span>
         </a>
       </div>
 
@@ -1101,7 +910,7 @@ export default function App() {
         {[
           { id: 'home', label: t.nav.home, href: '#home', icon: Home },
           { id: 'services', label: t.nav.services, href: '#services', icon: Building2 },
-          { id: 'track', label: t.nav.track, href: '#track', icon: Search },
+          { id: 'faq', label: t.nav.faq, href: '#faq', icon: HelpCircle },
           { id: 'contact', label: t.nav.contact, href: '#contact', icon: Phone },
         ].map((tab) => {
           const TabIcon = tab.icon;
@@ -1111,7 +920,7 @@ export default function App() {
               key={tab.id}
               href={tab.href}
               onClick={() =>
-                setActiveMobileTab(tab.id as 'home' | 'services' | 'track' | 'contact')
+                setActiveMobileTab(tab.id as 'home' | 'services' | 'faq' | 'contact')
               }
               className={`min-h-[44px] flex flex-col items-center justify-center transition-colors ${
                 isActive
@@ -1129,31 +938,12 @@ export default function App() {
       </nav>
 
       {/* =====================================================================
-          MODALS (Service Detail & 4-Step Online Application)
+          SERVICE DETAILS MODAL (Documents Checklist)
       ===================================================================== */}
       <ServiceDetailModal
         service={detailService}
         lang={lang}
         onClose={() => setDetailService(null)}
-        onApplyService={(serviceId, subService) =>
-          openApplicationForService(serviceId, subService)
-        }
-      />
-
-      <ApplicationModal
-        isOpen={appModalOpen}
-        services={services}
-        initialServiceId={appModalServiceId}
-        initialSubService={appModalSubService}
-        lang={lang}
-        onClose={() => setAppModalOpen(false)}
-        onApplicationSubmitted={handleAddApplication}
-        onTrackApplicationId={(appId) => {
-          setTrackQuery(appId);
-          handleTrackSearch(undefined, appId);
-          const el = document.getElementById('track');
-          el?.scrollIntoView({ behavior: 'smooth' });
-        }}
       />
     </div>
   );

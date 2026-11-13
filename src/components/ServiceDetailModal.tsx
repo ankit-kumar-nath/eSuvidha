@@ -9,7 +9,6 @@ import {
   Printer,
   ShieldCheck,
   X,
-  ArrowRight,
 } from 'lucide-react';
 import { CENTER_CONFIG, Language, ServiceItem } from '../data/servicesData';
 
@@ -17,14 +16,12 @@ interface ServiceDetailModalProps {
   service: ServiceItem | null;
   lang: Language;
   onClose: () => void;
-  onApplyService: (serviceId: string, subService?: string) => void;
 }
 
 export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
   service,
   lang,
   onClose,
-  onApplyService,
 }) => {
   const [checkedDocs, setCheckedDocs] = useState<Record<number, boolean>>({});
   const [selectedSub, setSelectedSub] = useState<string>('');
@@ -142,7 +139,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
           {/* Interactive Sub-Services Selector */}
           <div>
             <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-              Select Specific Task
+              Services Covered
             </h3>
             <div className="mt-2.5 grid grid-cols-1 sm:grid-cols-2 gap-2">
               {service.subServices.map((sub) => {
@@ -175,7 +172,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
                   <span>Required Documents Checklist</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Tick items below to check your documents before applying
+                  Tick items below to check your documents
                 </p>
               </div>
               <div className="flex items-center gap-2 no-print">
@@ -255,27 +252,16 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
         </div>
 
         {/* Sticky Modal Footer */}
-        <div className="px-6 py-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 shrink-0 no-print">
+        <div className="px-6 py-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-end gap-3 shrink-0 no-print">
           <a
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="min-h-[44px] px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-2"
+            className="min-h-[44px] px-6 py-2.5 rounded-xl bg-[#138808] hover:bg-[#0f6f06] text-white font-semibold text-xs sm:text-sm transition-colors flex items-center gap-2"
           >
-            <MessageCircle className="w-4 h-4 text-[#138808]" />
-            <span>Chat on WhatsApp</span>
+            <MessageCircle className="w-4 h-4" />
+            <span>WhatsApp Us</span>
           </a>
-
-          <button
-            type="button"
-            onClick={() => {
-              onApplyService(service.id, selectedSub || service.subServices[0]);
-            }}
-            className="min-h-[44px] px-6 py-2.5 rounded-xl bg-[#FF9933] hover:bg-[#e88724] text-slate-950 font-semibold text-xs sm:text-sm transition-colors flex items-center gap-2 cursor-pointer"
-          >
-            <span>Apply Online</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
         </div>
       </div>
     </div>

@@ -386,18 +386,18 @@ export const INITIAL_SERVICES: ServiceItem[] = [
 
 export const GENERAL_FAQS: ServiceFAQ[] = [
   {
-    question: 'Can I apply for services completely online from home?',
+    question: 'How can I apply for a service from home?',
     answer:
-      'Yes. You can submit your request through our 4-step online form or send your documents directly on WhatsApp (+91 76090 68783). We process your application and send the official portal acknowledgment receipt to your phone.',
+      'Simply check the Required Documents list for your service and send clear photos or PDFs of your documents to us on WhatsApp. We process your application and send the official portal acknowledgment receipt to your phone.',
   },
   {
     question: 'How is my personal data protected?',
     answer:
-      'Our online form only asks for the last 4 digits of your Aadhaar for reference. Uploaded files are used strictly to file your application on the official portal and are never stored publicly.',
+      'Your shared documents are used strictly to file your application on the official government portal and are never shared or stored publicly.',
   },
   {
-    question: 'How can I track my application status?',
+    question: 'How will I receive my acknowledgment receipt and final certificate?',
     answer:
-      'When you submit an application online, you immediately receive a unique Application ID. Enter your Application ID or 10-digit mobile number in the Track Status section to check real-time progress.',
+      'Once your application is submitted on the portal, we immediately share the official acknowledgment receipt on your WhatsApp, followed by the final certificate PDF once approved.',
   },
 ];
