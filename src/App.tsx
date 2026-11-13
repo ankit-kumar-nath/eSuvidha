@@ -41,8 +41,9 @@ import {
 import { TRANSLATIONS } from './data/translations';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { ServiceDetailModal } from './components/ServiceDetailModal';
+import heroBannerImg from './assets/images/esuvidha_civic_center_hero_1794578346379.jpg';
 
-const HERO_IMAGE_PATH = '/src/assets/images/esuvidha_civic_center_hero_1794578346379.jpg';
+const HERO_IMAGE_PATH = heroBannerImg || '/hero-center.jpg';
 
 const SERVICE_ICONS: Record<ServiceItem['iconName'], React.ComponentType<{ className?: string }>> = {
   Landmark,
@@ -384,7 +385,11 @@ export default function App() {
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.currentTarget.style.display = 'none';
+                      if (!e.currentTarget.src.endsWith('/hero-center.jpg')) {
+                        e.currentTarget.src = '/hero-center.jpg';
+                      } else {
+                        e.currentTarget.style.display = 'none';
+                      }
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/25 to-transparent" />
