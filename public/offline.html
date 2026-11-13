@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Offline – eSuvidha Citizen Center</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+        background: #f8fafc;
+        color: #0f172a;
+        display: flex;
+        min-height: 100vh;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .card {
+        max-width: 440px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 32px;
+        text-align: center;
+      }
+      .badge {
+        display: inline-block;
+        color: #ff9933;
+        font-weight: 600;
+        font-size: 13px;
+        margin-bottom: 12px;
+      }
+      h1 {
+        color: #0b2a5b;
+        font-size: 22px;
+        margin: 0 0 12px;
+      }
+      p {
+        color: #475569;
+        font-size: 14px;
+        line-height: 1.6;
+        margin: 0 0 20px;
+      }
+      .contact {
+        background: #f1f5f9;
+        border-radius: 12px;
+        padding: 16px;
+        font-size: 13px;
+        color: #1e293b;
+        margin-bottom: 20px;
+      }
+      button {
+        background: #0b2a5b;
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 24px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="badge">eSuvidha · Offline Mode</div>
+      <h1>You are currently offline</h1>
+      <p>
+        Your saved application drafts and downloaded document checklists remain accessible once you reconnect. You can also reach our Bhubaneswar facilitation desk directly by phone.
+      </p>
+      <div class="contact">
+        <strong>Helpline / WhatsApp:</strong> +91 76090 68783<br />
+        <strong>Center:</strong> Plot 412, Saheed Nagar, Janpath, Bhubaneswar
+      </div>
+      <button onclick="window.location.reload()">Retry Connection</button>
+    </div>
+  </body>
+</html>

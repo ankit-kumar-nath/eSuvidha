@@ -1,0 +1,6 @@
+{
+  "name": "eSuvidha – Government Services & Documentation Center",
+  "description": "Fast, safe, and hassle-free citizen facilitation center in Bhubaneswar, Odisha for EPFO, PAN Card, Voter ID, Aadhaar updates, certificates, Ayushman Bharat, and online form filling.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
